@@ -70,37 +70,11 @@ goto fail
 :execute
 @rem Setup the command line
 
-set "WRAPPER_JAR=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar"
-if exist "%WRAPPER_JAR%" goto wrapperJarReady
-
-set "BASE64_SOURCE=%GRADLE_WRAPPER_JAR_BASE64%"
-if "%BASE64_SOURCE%"=="" set "BASE64_SOURCE=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar.base64"
-for %%I in ("%WRAPPER_JAR%") do set "WRAPPER_JAR_DIR=%%~dpI"
-if not exist "%WRAPPER_JAR_DIR%" mkdir "%WRAPPER_JAR_DIR%"
-if not exist "%BASE64_SOURCE%" goto missingWrapperSource
-powershell -NoLogo -NoProfile -Command ^
-  "$ErrorActionPreference = 'Stop';" ^
-  "$source = Get-Item $env:BASE64_SOURCE;" ^
-  "$target = $env:WRAPPER_JAR;" ^
-  "$tmp = \"$target.part\";" ^
-  "if (Test-Path $tmp) { Remove-Item $tmp -Force; }" ^
-  "$bytes = [Convert]::FromBase64String([IO.File]::ReadAllText($source.FullName));" ^
-  "[IO.File]::WriteAllBytes($tmp, $bytes);" ^
-  "Move-Item -Force $tmp $target"
-if %ERRORLEVEL% neq 0 goto fail
-goto wrapperJarReady
-
-:missingWrapperSource
-echo. 1>&2
-echo Gradle wrapper JAR not found at %WRAPPER_JAR% and base64 source %BASE64_SOURCE% missing. 1>&2
-goto fail
-
-:wrapperJarReady
-set CLASSPATH=%WRAPPER_JAR%
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 
 
 @rem Execute Gradle
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
 
 :end
 @rem End local scope for the variables with windows NT shell

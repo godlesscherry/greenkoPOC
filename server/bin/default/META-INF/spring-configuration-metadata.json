@@ -1,0 +1,80 @@
+{
+  "groups": [
+    {
+      "name": "windfarm",
+      "type": "com.greenko.windfarm.config.WindfarmProperties",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties"
+    },
+    {
+      "name": "windfarm.emitter",
+      "type": "com.greenko.windfarm.config.WindfarmProperties$Emitter",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties",
+      "sourceMethod": "public com.greenko.windfarm.config.WindfarmProperties.Emitter getEmitter() "
+    },
+    {
+      "name": "windfarm.listener",
+      "type": "com.greenko.windfarm.config.WindfarmProperties$Listener",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties",
+      "sourceMethod": "public com.greenko.windfarm.config.WindfarmProperties.Listener getListener() "
+    },
+    {
+      "name": "windfarm.seed",
+      "type": "com.greenko.windfarm.config.WindfarmProperties$Seed",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties",
+      "sourceMethod": "public com.greenko.windfarm.config.WindfarmProperties.Seed getSeed() "
+    }
+  ],
+  "properties": [
+    {
+      "name": "windfarm.dataset-path",
+      "type": "java.nio.file.Path",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties"
+    },
+    {
+      "name": "windfarm.emitter.accelerate",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Emitter"
+    },
+    {
+      "name": "windfarm.emitter.accelerated-interval",
+      "type": "java.time.Duration",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Emitter"
+    },
+    {
+      "name": "windfarm.emitter.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Emitter"
+    },
+    {
+      "name": "windfarm.emitter.interval",
+      "type": "java.time.Duration",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Emitter"
+    },
+    {
+      "name": "windfarm.listener.batch-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Listener"
+    },
+    {
+      "name": "windfarm.listener.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Listener"
+    },
+    {
+      "name": "windfarm.listener.flush-interval",
+      "type": "java.time.Duration",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Listener"
+    },
+    {
+      "name": "windfarm.seed.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Seed"
+    },
+    {
+      "name": "windfarm.seed.minutes",
+      "type": "java.lang.Integer",
+      "sourceType": "com.greenko.windfarm.config.WindfarmProperties$Seed"
+    }
+  ],
+  "hints": []
+}
