@@ -1,0 +1,22 @@
+# Root ignores
+node_modules/
+.env
+.env.*
+.data/
+.DS_Store
+.idea/
+.vscode/
+**/.DS_Store
+
+# Gradle
+.gradle/
+build/
+server/.gradle/
+server/build/
+client/node_modules/
+client/dist/
+client/.vite/
+server/gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+*.log

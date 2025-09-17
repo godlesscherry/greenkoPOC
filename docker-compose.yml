@@ -1,0 +1,20 @@
+services:
+  db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: windfarm-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: \'${DB_NAME:-windfarm}\'
+      POSTGRES_USER: \'${DB_USER:-postgres}\'
+      POSTGRES_PASSWORD: \'${DB_PASSWORD:-postgres}\'
+      TZ: UTC
+    ports:
+      - \'${DB_PORT:-5432}:5432\'
+    volumes:
+      - ./.data/db:/var/lib/postgresql/data
+    healthcheck:
+      test: [\'CMD-SHELL\', \"pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-windfarm}\"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: [\"postgres\", \"-c\", \"shared_buffers=512MB\", \"-c\", \"max_connections=200\", \"-c\", \"timescaledb.telemetry_level=off\"]
