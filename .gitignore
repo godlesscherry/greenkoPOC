@@ -20,3 +20,17 @@ server/gradle/wrapper/gradle-wrapper.jar
 
 # Logs
 *.log
+
+# Binary files
+*.bin
+*.exe
+*.dll
+*.so
+*.dylib
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
