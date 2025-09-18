@@ -83,6 +83,7 @@ public class SseHub {
       return true;
     } catch (IOException ex) {
       log.debug("Removing SSE emitter due to send failure", ex);
+      emitters.remove(emitter); 
       emitter.completeWithError(ex);
       return false;
     }
@@ -96,6 +97,7 @@ public class SseHub {
               try {
                 emitter.send(SseEmitter.event().name("heartbeat").comment("keep-alive"));
               } catch (IOException ignored) {
+                
                 emitters.remove(emitter);
                 emitter.complete();
               }

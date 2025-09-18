@@ -23,6 +23,7 @@ dependencies {
     implementation("io.projectreactor:reactor-core")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
     implementation("org.apache.commons:commons-math3:3.6.1")
 

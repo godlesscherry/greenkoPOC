@@ -63,7 +63,7 @@ public class TelemetryListener {
         new ParameterizedPreparedStatementSetter<>() {
           @Override
           public void setValues(PreparedStatement ps, TelemetryRecord record) throws SQLException {
-            ps.setObject(1, record.time());
+            ps.setObject(1, java.sql.Timestamp.from(record.time()));
             ps.setString(2, record.deviceId());
             ps.setDouble(3, record.energyKwh());
           }

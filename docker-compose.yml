@@ -1,6 +1,6 @@
 services:
   db:
-    image: timescale/timescaledb:latest-pg14
+    image: timescale/timescaledb:latest-pg13
     container_name: windfarm-db
     restart: unless-stopped
     environment:
