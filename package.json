@@ -1,0 +1,19 @@
+{
+  "name": "windfarm-poc",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "npm run db:up && concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && ./gradlew bootRun",
+    "client": "cd client && npm run dev -- --host",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && rm -rf .data/db",
+    "lint": "npm run -s lint:client",
+    "lint:client": "cd client && npm run lint",
+    "format": "cd client && npm run format"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
