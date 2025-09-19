@@ -15,12 +15,21 @@ import dayjs from 'dayjs';
 interface PowerChartProps {
   metrics: MetricPoint[];
   forecast: ForecastPoint[];
+  actualMultiplier: number;
+  actualLabel: string;
+  forecastLabel: string;
 }
 
-export function PowerChart({ metrics, forecast }: PowerChartProps) {
+export function PowerChart({
+  metrics,
+  forecast,
+  actualMultiplier,
+  actualLabel,
+  forecastLabel
+}: PowerChartProps) {
   const data = metrics.map((point) => ({
     time: point.bucketStart,
-    actual: point.averagePowerKw,
+    actual: point.averagePowerKw * actualMultiplier,
     forecast: null as number | null,
     ciBase: 0,
     ciRange: 0
@@ -56,7 +65,7 @@ export function PowerChart({ metrics, forecast }: PowerChartProps) {
         <Line
           type="monotone"
           dataKey="actual"
-          name="Actual"
+          name={actualLabel}
           stroke="#38bdf8"
           strokeWidth={2}
           dot={false}
@@ -82,7 +91,7 @@ export function PowerChart({ metrics, forecast }: PowerChartProps) {
         <Line
           type="monotone"
           dataKey="forecast"
-          name="Forecast"
+          name={forecastLabel}
           stroke="#fbbf24"
           strokeWidth={2}
           dot={false}
