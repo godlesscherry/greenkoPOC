@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import { fetchDevices, fetchForecast, fetchLatest, fetchMetrics } from './api/client';
 import type { ForecastPoint, MetricPoint, TelemetryRecord } from './api/types';
 import { useTelemetryStream } from './hooks/useTelemetryStream';
@@ -12,7 +13,9 @@ const RANGE_OPTIONS = [
   { label: 'Last 6 hours', minutes: 360 },
   { label: 'Last 24 hours', minutes: 1440 }
 ];
-const FIXED_DATE = dayjs('2025-01-01T23:59:59Z'); // Replace with the exact date in your dataset
+// Dataset covers 2025-01-01 00:00 through 2025-01-01 23:59 UTC.
+// Use a midpoint so historical and "future" (emitted) data are both available.
+const FIXED_DATE = dayjs('2025-01-01T12:00:00Z');
 
 export default function App() {
   const [range, setRange] = useState(RANGE_OPTIONS[0]);
@@ -23,6 +26,8 @@ export default function App() {
   const [latestEvents, setLatestEvents] = useState<TelemetryRecord[]>([]);
   const [live, setLive] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [referenceTime, setReferenceTime] = useState<Dayjs>(FIXED_DATE);
+  const skipMetricsRefreshRef = useRef(false);
 
   const isAllDevices = deviceId === 'ALL';
   const deviceCountForAggregation = isAllDevices ? Math.max(devices.length, 1) : 1;
@@ -37,24 +42,34 @@ export default function App() {
       .catch((err) => console.error('Failed to load devices', err));
   }, []);
 
-  const loadMetrics = useCallback(async () => {
-    const now = FIXED_DATE; // Use the fixed date
-    const to = now.toISOString();
-    const from = now.subtract(range.minutes, 'minute').toISOString();
-    try {
-      const response = await fetchMetrics({
-        from,
-        to,
-        deviceId,
-        bucket: 'PT1M'
-      });
-      setMetrics(response.points);
-      setError(null);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to load metrics');
+  const loadMetrics = useCallback(
+    async (anchor: Dayjs) => {
+      const to = anchor.toISOString();
+      const from = anchor.subtract(range.minutes, 'minute').toISOString();
+      try {
+        const response = await fetchMetrics({
+          from,
+          to,
+          deviceId,
+          bucket: 'PT1M'
+        });
+        setMetrics(response.points);
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load metrics');
+      }
+    },
+    [range.minutes, deviceId]
+  );
+
+  useEffect(() => {
+    if (skipMetricsRefreshRef.current) {
+      skipMetricsRefreshRef.current = false;
+      return;
     }
-  }, [range.minutes, deviceId]);
+    void loadMetrics(referenceTime);
+  }, [loadMetrics, referenceTime]);
 
   const loadForecast = useCallback(async () => {
     try {
@@ -85,10 +100,12 @@ export default function App() {
   }, [deviceId]);
 
   useEffect(() => {
-    loadMetrics();
     loadForecast();
+  }, [loadForecast]);
+
+  useEffect(() => {
     loadLatest();
-  }, [loadMetrics, loadForecast, loadLatest]);
+  }, [loadLatest]);
 
   const handleIncoming = useCallback(
     (record: TelemetryRecord) => {
@@ -101,8 +118,18 @@ export default function App() {
         return next.slice(-50);
       });
       if (live) {
-        loadMetrics();
-        loadForecast();
+        const eventTime = dayjs(record.time);
+        let advanced = false;
+        setReferenceTime((prev) => {
+          if (eventTime.isAfter(prev)) {
+            advanced = true;
+            return eventTime;
+          }
+          return prev;
+        });
+        skipMetricsRefreshRef.current = advanced;
+        void loadMetrics(eventTime);
+        void loadForecast();
       }
     },
     [live, loadMetrics, loadForecast]
