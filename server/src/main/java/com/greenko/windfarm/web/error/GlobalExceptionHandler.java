@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,14 +27,35 @@ public class GlobalExceptionHandler {
     return problem(HttpStatus.CONFLICT, ex, request);
   }
 
+  @ExceptionHandler(AsyncRequestNotUsableException.class)
+  public void handleAsyncRequestNotUsable(AsyncRequestNotUsableException ex, HttpServletRequest request) {
+    // Log at debug level - this is expected for SSE disconnections
+    log.debug("Async request not usable (likely SSE disconnection): {}", ex.getMessage());
+    // Don't try to return a response for SSE endpoints - just let it complete
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetails> handleGeneric(Exception ex, HttpServletRequest request) {
+    // Skip error responses for SSE endpoints to avoid converter issues
+    String contentType = request.getHeader("Accept");
+    if (contentType != null && contentType.contains("text/event-stream")) {
+      log.debug("Skipping error response for SSE endpoint: {}", ex.getMessage());
+      return null; // Let Spring handle it gracefully
+    }
+
     log.error("Unhandled error", ex);
     return problem(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
   }
 
   private ResponseEntity<ProblemDetails> problem(
       HttpStatus status, Exception exception, HttpServletRequest request) {
+    // Skip error responses for SSE endpoints to avoid converter issues
+    String contentType = request.getHeader("Accept");
+    if (contentType != null && contentType.contains("text/event-stream")) {
+      log.debug("Skipping error response for SSE endpoint: {}", exception.getMessage());
+      return null;
+    }
+
     ProblemDetails details =
         new ProblemDetails(
             Instant.now(),

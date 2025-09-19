@@ -67,7 +67,15 @@ public class SseHub {
   }
 
   private void broadcast(TelemetryRecord record) {
-    emitters.entrySet().removeIf(entry -> !send(entry.getKey(), entry.getValue(), record));
+    emitters.entrySet().removeIf(entry -> {
+      try {
+        return !send(entry.getKey(), entry.getValue(), record);
+      } catch (Exception e) {
+        log.debug("Error during broadcast, removing emitter", e);
+        // Don't try to complete emitters that are already in error state
+        return true; // Remove this emitter
+      }
+    });
   }
 
   private boolean send(SseEmitter emitter, Optional<String> filter, TelemetryRecord record) {
@@ -83,25 +91,25 @@ public class SseHub {
       return true;
     } catch (IOException ex) {
       log.debug("Removing SSE emitter due to send failure", ex);
-      emitters.remove(emitter); 
-      emitter.completeWithError(ex);
+      // Don't try to complete - just remove from map
+      return false;
+    } catch (IllegalStateException ex) {
+      log.debug("SSE emitter already in invalid state, removing", ex);
       return false;
     }
   }
 
   private void sendHeartbeats() {
-    emitters
-        .keySet()
-        .forEach(
-            emitter -> {
-              try {
-                emitter.send(SseEmitter.event().name("heartbeat").comment("keep-alive"));
-              } catch (IOException ignored) {
-                
-                emitters.remove(emitter);
-                emitter.complete();
-              }
-            });
+    emitters.keySet().removeIf(emitter -> {
+      try {
+        emitter.send(SseEmitter.event().name("heartbeat").comment("keep-alive"));
+        return false; // Keep this emitter
+      } catch (IOException | IllegalStateException e) {
+        log.debug("Removing disconnected emitter during heartbeat", e);
+        // Don't try to complete - just remove from map
+        return true; // Remove this emitter
+      }
+    });
   }
 
   @PreDestroy
