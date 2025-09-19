@@ -61,10 +61,15 @@ export async function fetchForecast(params: {
   return handleResponse<ForecastResponse>(resp);
 }
 
+const DEVICE_NAME_COLLATOR = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: 'base'
+});
+
 export async function fetchDevices(): Promise<string[]> {
   const resp = await fetch(resolveApiUrl('/api/devices'));
   const json = await handleResponse<DeviceListResponse>(resp);
-  return json.devices;
+  return [...json.devices].sort((a, b) => DEVICE_NAME_COLLATOR.compare(a, b));
 }
 
 export async function fetchLatest(deviceId?: string, limit = 50): Promise<TelemetryRecord[]> {
