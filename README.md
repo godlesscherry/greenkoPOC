@@ -5,7 +5,7 @@ timeseries in TimescaleDB, and visualises live power output alongside a lightwei
 
 ## Architecture
 
-- **PostgreSQL 15 + TimescaleDB** via Docker Compose.
+- **PostgreSQL 13 + TimescaleDB** via Docker Compose.
 - **Spring Boot 3 / Java 21** backend with SSE streaming, JDBC ingestion pipeline, and REST APIs.
 - **Vite + React 18** dashboard with Recharts visualisations and live event handling.
 - **Flyway** for database migrations, **Spotless + ESLint/Prettier** for formatting.
