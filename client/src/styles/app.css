@@ -26,6 +26,24 @@ a {
   min-height: 100vh;
 }
 
+.page-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-intro h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.page-intro p {
+  margin: 0;
+  color: #94a3b8;
+  max-width: 48rem;
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
