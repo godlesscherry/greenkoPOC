@@ -24,6 +24,9 @@ export default function App() {
   const [live, setLive] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isAllDevices = deviceId === 'ALL';
+  const deviceCountForAggregation = isAllDevices ? Math.max(devices.length, 1) : 1;
+
   useEffect(() => {
     document.title = 'Windfarm Control Room';
   }, []);
@@ -109,8 +112,11 @@ export default function App() {
 
   const currentPower = useMemo(() => {
     const last = metrics[metrics.length - 1];
-    return last ? last.averagePowerKw : 0;
-  }, [metrics]);
+    if (!last) {
+      return 0;
+    }
+    return last.averagePowerKw * deviceCountForAggregation;
+  }, [metrics, deviceCountForAggregation]);
 
   const totalEnergyMWh = useMemo(() => {
     const sum = metrics.reduce((acc, point) => acc + point.totalEnergyKwh, 0);
@@ -118,8 +124,11 @@ export default function App() {
   }, [metrics]);
 
   const maxPower = useMemo(() => {
-    return metrics.reduce((acc, point) => Math.max(acc, point.averagePowerKw), 0);
-  }, [metrics]);
+    return metrics.reduce(
+      (acc, point) => Math.max(acc, point.averagePowerKw * deviceCountForAggregation),
+      0
+    );
+  }, [metrics, deviceCountForAggregation]);
 
   const forecastFirst = forecast[0]?.predictedPowerKw ?? 0;
 
@@ -168,15 +177,33 @@ export default function App() {
       {error ? <div className="card">{error}</div> : null}
 
       <section className="card-grid">
-        <KpiCard title="Current Power" value={`${currentPower.toFixed(1)} kW`} />
-        <KpiCard title="Energy (range)" value={`${totalEnergyMWh.toFixed(2)} MWh`} />
-        <KpiCard title="Peak Power" value={`${maxPower.toFixed(1)} kW`} />
-        <KpiCard title="Next Forecast" value={`${forecastFirst.toFixed(1)} kW`} />
+        <KpiCard
+          title={isAllDevices ? 'Total Power' : 'Current Power'}
+          value={`${currentPower.toFixed(1)} kW`}
+        />
+        <KpiCard
+          title={isAllDevices ? 'Total Energy (range)' : 'Energy (range)'}
+          value={`${totalEnergyMWh.toFixed(2)} MWh`}
+        />
+        <KpiCard
+          title={isAllDevices ? 'Peak Total Power' : 'Peak Power'}
+          value={`${maxPower.toFixed(1)} kW`}
+        />
+        <KpiCard
+          title={isAllDevices ? 'Next Total Forecast' : 'Next Forecast'}
+          value={`${forecastFirst.toFixed(1)} kW`}
+        />
       </section>
 
       <section className="chart-wrapper">
-        <h3>Power Output & Forecast</h3>
-        <PowerChart metrics={metrics} forecast={forecast} />
+        <h3>{isAllDevices ? 'Total Power Output & Forecast' : 'Power Output & Forecast'}</h3>
+        <PowerChart
+          metrics={metrics}
+          forecast={forecast}
+          actualMultiplier={deviceCountForAggregation}
+          actualLabel={isAllDevices ? 'Total Actual Power' : 'Actual Power'}
+          forecastLabel={isAllDevices ? 'Total Forecast Power' : 'Forecast Power'}
+        />
       </section>
 
       <LatestEventsTable events={latestEvents} />
