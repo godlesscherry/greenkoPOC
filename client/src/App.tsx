@@ -125,6 +125,14 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <section className="page-intro">
+        <h1>Windfarm Control Room</h1>
+        <p>
+          Monitor turbine performance, compare historical output, and keep an eye on
+          the latest alerts from the field in one place.
+        </p>
+      </section>
+
       <header className="controls">
         <div className="control-group">
           {RANGE_OPTIONS.map((option) => (
