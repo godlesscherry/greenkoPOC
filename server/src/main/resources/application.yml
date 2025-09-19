@@ -24,9 +24,9 @@ windfarm:
   dataset-path: ${DATASET_PATH:data/device_energy_data.csv}
   emitter:
     enabled: true
-    interval: PT60S
-    accelerated-interval: PT1S
-    accelerate: ${EMIT_ACCELERATE:false}
+    interval: PT0.5S
+    accelerated-interval: PT0.1S
+    accelerate: ${EMIT_ACCELERATE:true}
   listener:
     enabled: true
     flush-interval: PT0.2S

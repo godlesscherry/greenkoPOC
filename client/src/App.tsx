@@ -12,6 +12,7 @@ const RANGE_OPTIONS = [
   { label: 'Last 6 hours', minutes: 360 },
   { label: 'Last 24 hours', minutes: 1440 }
 ];
+const FIXED_DATE = dayjs('2025-01-01T23:59:59Z'); // Replace with the exact date in your dataset
 
 export default function App() {
   const [range, setRange] = useState(RANGE_OPTIONS[0]);
@@ -34,7 +35,7 @@ export default function App() {
   }, []);
 
   const loadMetrics = useCallback(async () => {
-    const now = dayjs();
+    const now = FIXED_DATE; // Use the fixed date
     const to = now.toISOString();
     const from = now.subtract(range.minutes, 'minute').toISOString();
     try {

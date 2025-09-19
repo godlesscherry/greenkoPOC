@@ -47,14 +47,14 @@ public class JdbcTelemetryRepository implements TelemetryRepository {
     Object[] params;
     if (deviceId.isPresent()) {
       params = new Object[] {
-          java.sql.Timestamp.from(from),
-          java.sql.Timestamp.from(to),
-          deviceId.get()
+              java.sql.Timestamp.from(from),
+              java.sql.Timestamp.from(to),
+              deviceId.get()
       };
     } else {
       params = new Object[] {
-          java.sql.Timestamp.from(from),
-          java.sql.Timestamp.from(to)
+              java.sql.Timestamp.from(from),
+              java.sql.Timestamp.from(to)
       };
     }
 
@@ -101,28 +101,27 @@ public class JdbcTelemetryRepository implements TelemetryRepository {
   @Override
   public List<TimeSeriesPoint> loadPowerSeries(
           Instant from, Instant to, Optional<String> deviceId) {
-    StringBuilder sql = new StringBuilder("SELECT time, ");
     if (deviceId.isPresent()) {
-      sql.append(
-              "power_kw AS power FROM telemetry WHERE device_id = ? AND time >= ? AND time <= ? ORDER BY time");
+      String sql = "SELECT time, power_kw AS power FROM telemetry WHERE device_id = ? AND time >= ? AND time <= ? ORDER BY time";
       return jdbcTemplate.query(
-              sql.toString(),
+              sql,
               new Object[] {
-                  deviceId.get(),
-                  java.sql.Timestamp.from(from),
-                  java.sql.Timestamp.from(to)
+                      deviceId.get(),
+                      java.sql.Timestamp.from(from),
+                      java.sql.Timestamp.from(to)
+              },
+              this::mapTimeSeriesPoint);
+    } else {
+      // Fixed: Use time_bucket for proper aggregation across all devices
+      String sql = "SELECT time_bucket('1 minute', time) AS time, SUM(power_kw) AS power FROM telemetry WHERE time >= ? AND time <= ? GROUP BY time_bucket('1 minute', time) ORDER BY time";
+      return jdbcTemplate.query(
+              sql,
+              new Object[] {
+                      java.sql.Timestamp.from(from),
+                      java.sql.Timestamp.from(to)
               },
               this::mapTimeSeriesPoint);
     }
-    sql.append(
-            "SUM(power_kw) AS power FROM telemetry WHERE time >= ? AND time <= ? GROUP BY time ORDER BY time");
-    return jdbcTemplate.query(
-            sql.toString(),
-            new Object[] {
-                java.sql.Timestamp.from(from),
-                java.sql.Timestamp.from(to)
-            },
-            this::mapTimeSeriesPoint);
   }
 
   @Override
